@@ -1,9 +1,6 @@
     'use client';
 
     import { useRef, useState } from "react";
-    import moment from "moment";
-    import {revalidatePath} from "next/cache";
-    import {revalidateData} from "@/components/revalidate";
 
     const StudentForm = ({ availableSlots, handleFormSubmit, formData, btnText, setFormData, btnStyle }: any) => {
         const dialogRef = useRef<HTMLDialogElement | null>(null);
@@ -63,7 +60,6 @@
                             <button
                                 onClick={() => {
                                     dialogRef.current?.close();
-                                    revalidateData()
                                 }}
                                 type="submit"
                                 className={btnStyle}
