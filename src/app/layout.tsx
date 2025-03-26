@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Image from "next/image";
+import logo from "../../public/images.png";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,11 +26,34 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+    <head>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"/>
+      <link rel="preconnect" href="https://fonts.googleapis.com"/>
+      <link rel="preconnect" href="https://fonts.gstatic.com" />
+      <link
+          href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+          rel="stylesheet"/>
+    </head>
+    <body
+        className={`p-8 antialiased`}
+    >
+    <header className="flex items-center space-x-20 justify-between">
+      <Image src={logo} alt="logo"/>
+      <div className="flex items-center flex-grow w-[80%] p-3 bg-gray-100 rounded-lg">
+        <svg className="w-5 h-5 text-gray-400 mx-2 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2"
+             viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round"
+                d="M21 21l-4.35-4.35m0 0a7.5 7.5 0 1 0-1.5 1.5L21 21z"/>
+        </svg>
+        <input
+            type="text"
+            placeholder="Search a Doctor"
+            className="flex-grow w-[80%] bg-transparent outline-none text-gray-600 placeholder-gray-400"
+        />
+      </div>
+    </header>
+    {children}
+    </body>
     </html>
   );
 }

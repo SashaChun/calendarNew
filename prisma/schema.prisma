@@ -1,0 +1,29 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Teacher {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  fullName   String
+  faculty    String
+  department String
+  degree     String
+  startHour  Int
+  endHour    Int
+  photo      String?
+  students   Student[]
+}
+
+model Student {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  fullName  String
+  group     String
+  date      DateTime
+  teacher   Teacher  @relation(fields: [teacherId], references: [id])
+  teacherId String   @db.ObjectId
+}
