@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import moment from "moment";
 import MyCalendar from "@/components/calendar";
 import { useRouter } from "next/navigation";
+import Loader from "@/components/Loader";
 
 moment.updateLocale('en', {
     // Налаштування локалі (якщо потрібно)
@@ -63,7 +64,7 @@ const Appointment = () => {
     }, [id]);  // Залежність від id для повторного запиту
 
     if (loading) {
-        return <div>Loading...</div>;  // Показуємо loading, поки не прийшли дані
+        return <Loader/>;  // Показуємо loading, поки не прийшли дані
     }
 
     if (!teacher) {

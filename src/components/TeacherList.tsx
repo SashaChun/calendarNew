@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Teacher from "@/components/teacher";
-import teacherPhoto from "../../public/Foto_0.jpg";
+import Loader from "@/components/Loader";
 
 interface Student {
     fullName: string;
@@ -37,7 +37,7 @@ export default function TeacherList() {
         fetchTeachers();
     }, []);
 
-    if (loading) return <div>Завантаження...</div>;
+    if (loading) return <Loader/>;
     if (!teachers.length) return <div>Немає викладачів для відображення</div>;
 
     const maxStudents = 4;
@@ -52,7 +52,7 @@ export default function TeacherList() {
                         link={teacher.id}
                         pib={teacher.fullName}
                         key={teacher.id}
-                        photo={teacher?.photo || teacherPhoto}
+                        photo={teacher?.photo }
                         availableSlots={availableSlots}
                     />
                 );
