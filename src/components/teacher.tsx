@@ -4,23 +4,17 @@ import ApointmentButton from "@/components/apointmentButton";
 
 type TeacherProps = {
     photo?: string | StaticImageData;
-    availableSlots: number; // Кількість вільних місць
-    pib :string,
-    link : string
+    availableSlots: number;
+    pib: string; // Прізвище, ім'я, по батькові
+    link: string; // Посилання на профіль викладача
 };
 
-const Teacher: FC<TeacherProps> = ({ photo, pib ,availableSlots,link }) => {
-
-    function handleSubmit(){
-
-    }
+const Teacher: FC<TeacherProps> = ({ photo, pib, availableSlots, link }) => {
 
     return (
-
         <div className="w-full px-7 py-5 h-auto flex flex-col md:flex-row items-center bg-[#3b3d93] rounded-[10px] relative overflow-hidden space-y-5 md:space-y-0 md:space-x-5">
-
             {/* Фото викладача */}
-            <div className="flex justify-center   ">
+            <div className="flex justify-center">
                 <div className="bg-white rounded-full overflow-hidden w-[150px] h-[150px]">
                     {photo ? (
                         <Image src={photo} alt="Teacher photo" width={150} height={150} />
@@ -44,7 +38,7 @@ const Teacher: FC<TeacherProps> = ({ photo, pib ,availableSlots,link }) => {
                     {availableSlots > 0 ? `Вільні місця: ${availableSlots}` : "Немає вільних місць"}
                 </p>
 
-                <ApointmentButton availableSlots={availableSlots} link={link}/>
+                <ApointmentButton availableSlots={availableSlots} link={link} />
             </div>
         </div>
     );

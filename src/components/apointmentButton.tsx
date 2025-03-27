@@ -14,6 +14,7 @@ const ApointmentButton:FC<ApointmentButton> = ({availableSlots , link}) => {
 
     const handleNavigation = () => {
         router.push( `/${link}`);
+
     };
 
     return <div>

@@ -6,6 +6,7 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import StydenForm from '@/components/stydenForm';
 import { useParams } from 'next/navigation';
+import { createStydentAction } from "../../actions/createStydentAction";
 
 // Налаштовуємо moment на 24-годинний формат
 moment.updateLocale('en', {
@@ -36,6 +37,12 @@ interface FormData {
     group: string;
 }
 
+interface Event {
+    start: Date;
+    end: Date;
+    title: string;
+}
+
 const MyCalendar: FC<MyCalendarProps> = ({ startHour, data, endHour }) => {
     const [currentView, setCurrentView] = useState<View>('month');
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -46,9 +53,9 @@ const MyCalendar: FC<MyCalendarProps> = ({ startHour, data, endHour }) => {
     const params = useParams() as unknown as Params;
     const { id } = params;
 
-    let btnStyle = { btnText: 'Записатися', btnStyle: 'bg-[#3b3d93] text-white py-2 px-4 rounded-md' };
+    const btnStyle = { btnText: 'Записатися', btnStyle: 'bg-[#3b3d93] text-white py-2 px-4 rounded-md' };
 
-    const events: any[] = [];
+    const events: Event[] = []; // Define your events with correct types
 
     const handleViewChange = (view: View) => {
         setCurrentView(view);
@@ -62,63 +69,17 @@ const MyCalendar: FC<MyCalendarProps> = ({ startHour, data, endHour }) => {
     };
 
     const handleFormSubmit = async (event: React.FormEvent) => {
-        event.preventDefault();
-
-        // Функція для форматування дати в ISO 8601 формат з часовою зоною
-        const formatToISOString = (date: Date | null): string => {
-            if (!date) return '';
-            return date.toISOString(); // Повертає дату у форматі '2025-03-25T10:00:00.000Z'
-        };
-
-        // Форматуємо дату
-        const formattedStartDate = formatToISOString(selectedStartDate);
-
-        try {
-            const teacherResponse = await fetch(`/api/teachers/${id}`, {
-                cache: 'no-store'
-            });
-            const teacherData = await teacherResponse.json();
-
-            // Перевіряємо, чи отримали викладача та його студентів
-            if (!teacherData || !teacherData.students) {
-                alert('Не вдалося знайти інформацію про викладача або його студентів.');
-                return;
-            }
-
-            if (teacherData.students.length >= 4) {
-                return btnStyle = { btnText: 'Немає відьних мість', btnStyle: 'bg-red-700 text-white py-2 px-4 rounded-md' };
-            }
-
+        if (selectedStartDate) {
+            const formattedStartDate = moment(selectedStartDate).format('YYYY-MM-DD HH:mm'); // Format date
             const studentData = {
-                "fullName": formData.name,
-                "group": formData.group,
-                "date": formattedStartDate,
-                "teacherId": id
+                fullName: formData.name,
+                group: formData.group,
+                date: formattedStartDate,
+                teacherId: id
             };
-
-            console.log(studentData);
-
-            const response = await fetch('/api/students', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(studentData),
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log('Student created:', data);
-        } catch (error) {
-            console.error('Error submitting form:', (error as Error).message);
+            await createStydentAction(studentData); // Ensure this action works correctly
         }
     };
-
-    console.log('Початкова дата:', moment(selectedStartDate).format('YYYY-MM-DD HH:mm').slice(0, 16)); // Перші 16 символів
-    console.log('Кінцева дата:', moment(selectedEndDate).format('YYYY-MM-DD HH:mm').slice(0, 16)); // Перші 16 символів
 
     // Функція для перевірки доступних годин
     const isSlotAvailable = (date: Date) => {
@@ -132,12 +93,10 @@ const MyCalendar: FC<MyCalendarProps> = ({ startHour, data, endHour }) => {
         return {
             style: {
                 backgroundColor: available ? '#3b3d93' : 'lightgrey',
-                pointerEvents: available ? 'auto' : 'none' as 'auto' | 'none', // Явне вказання типу
+                pointerEvents: available ? 'auto' : 'none' as 'auto' | 'none',
             },
         };
     };
-
-    console.log('data boolean', data)
 
     return (
         <div style={{ height: 500 }}>
@@ -228,9 +187,15 @@ const MyCalendar: FC<MyCalendarProps> = ({ startHour, data, endHour }) => {
                 data ?
                     <div className="bg-red-500 text-white py-3 px-6 rounded-lg text-center font-bold shadow-md mt-5">
                         <span>Переведено</span>
-                    </div> : <StydenForm btnText={btnStyle.btnText} btnStyle={btnStyle.btnStyle} availableSlots={1}
-                                         handleFormSubmit={handleFormSubmit} formData={formData}
-                                         setFormData={setFormData}/>
+                    </div> :
+                    <StydenForm
+                        btnText={btnStyle.btnText}
+                        btnStyle={btnStyle.btnStyle}
+                        availableSlots={1}
+                        handleFormSubmit={handleFormSubmit}
+                        formData={formData}
+                        setFormData={setFormData}
+                    />
             }
         </div>
     );
