@@ -27,12 +27,12 @@ interface TeacherProfileProps {
 }
 
 const TeacherProfile = ({ teacher }: { teacher: Teacher }) => {
-    const availableSlots = 4 - teacher.students.length;
     const [hasMoreThanThreeStudents, setHasMoreThanThreeStudents] = useState(false);
 
     const privatStydent = teacher.students.filter(student => student.contentType === 'privet');
     const publicStydent = teacher.students.filter(student => student.contentType === 'public');
 
+    const availableSlots = 4 - privatStydent.length;
     // Обчислюємо, чи є більше ніж 3 студенти лише один раз
     useEffect(() => {
         if (privatStydent.length >= 4) {
