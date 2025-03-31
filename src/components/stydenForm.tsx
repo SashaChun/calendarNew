@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import {revalidateProduct} from "../../actions/revalidateStudentData";
+import {string} from "prop-types";
 const StudentForm = ({
                          availableSlots,
                          handleFormSubmit,
@@ -14,10 +15,12 @@ const StudentForm = ({
     const dialogRef = useRef<HTMLDialogElement | null>(null);
     const { id } = useParams();
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async ()  => {
         await handleFormSubmit();
         dialogRef.current?.close();
-        await revalidateProduct(id);
+        if (id) {
+            await revalidateProduct(id);
+        }
     };
 
     return (

@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 export interface Student {
     fullName: string;
     group: string;
+    contentType: 'privet' | 'public'; // Додаємо contentType
 }
 
 export interface Teacher {

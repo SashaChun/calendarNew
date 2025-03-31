@@ -1,11 +1,7 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from 'next/cache'; ;
 
-type  revalidateProductType = {
-    productId : string
-}
-
-export async function revalidateProduct(productId : revalidateProductType) {
+export async function revalidateProduct(productId : any) {
     revalidatePath(`/${productId}`);
 }
