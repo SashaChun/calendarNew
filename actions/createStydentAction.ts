@@ -4,7 +4,7 @@ import prisma from '../src/lib/prismaDB'
 import { ObjectId } from 'mongodb';
 
 
-export async function createStydentAction({ fullName, group, date, teacherId }: { fullName: string, group: string, date: string, teacherId: string }) {
+export async function createStydentAction({ fullName, group, contentType ,date, teacherId }: { fullName: string, group: string, contentType : string, date: string, teacherId: string }) {
     try {
         // Перевірка обов'язкових полів
         if (!fullName || !group || !date || !teacherId) {
@@ -21,7 +21,6 @@ export async function createStydentAction({ fullName, group, date, teacherId }: 
         if (isNaN(parsedDate.getTime())) {
             throw new Error('Невірний формат дати.');
         }
-
         // Додавання студента
         const newStudent = await prisma.student.create({
             data: {
@@ -29,6 +28,7 @@ export async function createStydentAction({ fullName, group, date, teacherId }: 
                 group,
                 date: parsedDate,
                 teacherId,
+                contentType,
             },
         });
 

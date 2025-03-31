@@ -1,12 +1,13 @@
 'use client';
 
 import { FC, useState } from 'react';
-import { Calendar, momentLocalizer, View, SlotPropGetter } from 'react-big-calendar';
+import { Calendar, momentLocalizer, View, SlotPropGetter, DayPropGetter } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import StydenForm from '@/components/stydenForm';
 import { useParams } from 'next/navigation';
 import { createStydentAction } from "../../actions/createStydentAction";
+import {string} from "prop-types";
 
 // Налаштовуємо moment на 24-годинний формат
 moment.updateLocale('en', {
@@ -43,12 +44,15 @@ interface Event {
     title: string;
 }
 
-const MyCalendar: FC<MyCalendarProps> = ({ startHour, data, endHour }) => {
+const MyCalendar: FC<MyCalendarProps> = ({  startHour , endHour , data }) => {
+
+
     const [currentView, setCurrentView] = useState<View>('month');
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
     const [formData, setFormData] = useState<FormData>({ name: '', group: '' });
+    const [contentType , setContentType] = useState<string>('');
 
     const params = useParams() as unknown as Params;
     const { id } = params;
@@ -75,28 +79,111 @@ const MyCalendar: FC<MyCalendarProps> = ({ startHour, data, endHour }) => {
                 fullName: formData.name,
                 group: formData.group,
                 date: formattedStartDate,
-                teacherId: id
+                teacherId: id,
+                contentType : contentType,
             };
-            await createStydentAction(studentData); // Ensure this action works correctly
+            console.log(studentData)
+              await createStydentAction(studentData);
         }
     };
 
-    // Функція для перевірки доступних годин
     const isSlotAvailable = (date: Date) => {
-        const hour = date.getHours();
-        return hour >= startHour && hour < endHour;
+        const meetingHour = 14; // Час для зустрічі (14:00)
+        const hour = date.getHours(); // Отримуємо годину з дати
+
+        // Перевіряємо, чи час знаходиться в межах доступних годин
+        const isWithinAvailableTime = hour >= startHour && hour < endHour;
+
+        // Час 14:00 має бути доступним
+        const isAvailableAt14 = hour === meetingHour;
+
+        // Повертаємо об'єкт з результатами
+        return { isAvailableAt14, isWithinAvailableTime };
     };
 
-    // Функція для стилізації доступних слотів
+
+    // const isSlotAvailable = (date: Date) => {
+    //     const meetingHour = 14; // Час для зустрічі (14:00)
+    //     const hour = date.getHours(); // Отримуємо годину з дати
+    //
+    //     // Перевіряємо, чи час знаходиться в межах доступних годин
+    //     const isWithinAvailableTime = hour >= startHour && hour < endHour;
+    //
+    //     // Час 14:00 має бути доступним
+    //     const isAvailableAt14 = hour === meetingHour;
+    //
+    //     // Слот доступний, якщо він в межах доступного часу або це 14:00
+    //     return isWithinAvailableTime || isAvailableAt14;
+    // };
+
     const slotPropGetter: SlotPropGetter = (date: Date) => {
         const available = isSlotAvailable(date);
+        const meetingHour = 14;
+
+        const slotHour = date.getHours();
+        const slotMinutes = date.getMinutes();
+
         return {
             style: {
-                backgroundColor: available ? '#3b3d93' : 'lightgrey',
-                pointerEvents: available ? 'auto' : 'none' as 'auto' | 'none',
+                // Якщо це година 13:00, фон буде червоним
+                backgroundColor:
+                    (slotHour === meetingHour && slotMinutes === 0) ? 'green' : // Якщо це початок години 13:00, то червоний
+                        (available.isWithinAvailableTime && slotMinutes % 15 === 0) ? '#3b3d93' : 'lightgrey', // Якщо слот доступний і крок 15 хвилин, синій
+                pointerEvents: available.isWithinAvailableTime ? 'auto' : 'none' as 'auto' | 'none', // Дозволяємо вибір тільки для доступних слотів
             },
         };
     };
+
+
+    const dayPropGetter: DayPropGetter = (date: Date) => {
+        const isThursday = date.getDay() === 4; // Перевіряємо, чи четвер
+
+        return {
+            style: {
+                backgroundColor: isThursday ? '#3b3d93' : 'lightgrey',
+                color: isThursday ? 'white' : 'grey',
+            },
+        };
+    };
+
+    const handleSelectSlot = (slotInfo: any) => {
+
+        const slotHour = slotInfo.start.getHours();
+        const slotMinutes = slotInfo.start.getMinutes();
+
+        const isThursday = slotInfo.start.getDay() === 4;
+        if (isThursday) {
+            setCurrentView('day');
+        }
+
+        if (currentView === 'day') {
+            const roundedStart = new Date(slotInfo.start);
+            roundedStart.setMinutes(Math.round(roundedStart.getMinutes() / 15) * 15);
+
+
+            const res = isSlotAvailable(slotInfo.start);
+
+            const endDate = new Date(roundedStart);
+            endDate.setMinutes(endDate.getMinutes() + 15);
+
+            const meetingHour = 14;
+
+            if (res.isAvailableAt14) {
+                setContentType('public')
+            } else if (res.isWithinAvailableTime) {
+                setContentType('privet');
+            }else if(!res.isAvailableAt14 || !res.isWithinAvailableTime){
+                return 'no';
+            }
+
+            setSelectedStartDate(roundedStart);
+            setSelectedEndDate(endDate);
+
+            console.log(contentType)
+            console.log(selectedStartDate)
+        }
+    };
+
 
     return (
         <div style={{ height: 500 }}>
@@ -154,18 +241,7 @@ const MyCalendar: FC<MyCalendarProps> = ({ startHour, data, endHour }) => {
                     view={currentView}
                     date={currentDate}
                     selectable
-                    onSelectSlot={(slotInfo) => {
-                        setCurrentView('day');
-                        const roundedStart = roundToQuarter(slotInfo.start);
-                        const endDate = new Date(roundedStart);
-                        endDate.setMinutes(endDate.getMinutes() + 15);
-
-                        if (isSlotAvailable(roundedStart)) {
-                            setSelectedStartDate(roundedStart);
-                            setSelectedEndDate(endDate);
-                            setCurrentView('day');
-                        }
-                    }}
+                    onSelectSlot={handleSelectSlot}
                     onNavigate={(date) => setCurrentDate(date)}
                     style={{ width: 500, height: 300 }}
                     step={15}
@@ -174,6 +250,7 @@ const MyCalendar: FC<MyCalendarProps> = ({ startHour, data, endHour }) => {
                         toolbar: () => null,
                     }}
                     slotPropGetter={slotPropGetter}
+                    dayPropGetter={dayPropGetter} // Додаємо стилізацію для четверга
                 />
             </div>
 

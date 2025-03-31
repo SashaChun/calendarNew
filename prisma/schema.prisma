@@ -20,10 +20,11 @@ model Teacher {
 }
 
 model Student {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  fullName  String
-  group     String
-  date      DateTime
-  teacher   Teacher  @relation(fields: [teacherId], references: [id])
-  teacherId String   @db.ObjectId
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  fullName    String
+  group       String
+  date        DateTime
+  teacher     Teacher  @relation(fields: [teacherId], references: [id])
+  teacherId   String   @db.ObjectId
+  contentType String?
 }
